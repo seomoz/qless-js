@@ -1,0 +1,25 @@
+{
+  "name": "qless",
+  "version": "0.0.1",
+  "description": "Qless binding for JS",
+  "scripts": {
+    "lint": "node_modules/.bin/eslint --env node lib",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seomoz/qjess.git"
+  },
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/seomoz/qjess/issues"
+  },
+  "homepage": "https://github.com/seomoz/qjess#readme",
+  "dependencies": {
+    "redis": "^2.6.2"
+  },
+  "devDependencies": {
+    "eslint": "1.10.3",
+    "eslint-config-airbnb": "2.1.1"
+  }
+}
