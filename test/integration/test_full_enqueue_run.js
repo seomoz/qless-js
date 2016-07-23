@@ -3,9 +3,7 @@
 require('../helpers');
 
 describe('qless job integration test', () => {
-  // TODO: redis flushing. choosing a redis number
-  const client = new qless.Client();
-  const queue = client.queue('my_test_queue');
+  const queue = qlessClient.queue('my_test_queue');
 
   before(() => { qless.klassFinder.setModuleDir(__dirname + '/jobs') });
 
@@ -23,7 +21,7 @@ describe('qless job integration test', () => {
   });
 
   it('works when the job succeeds', done => {
-    const worker = new qless.SerialWorker('my_test_queue', client);
+    const worker = new qless.SerialWorker('my_test_queue', qlessClient);
 
     require('./jobs/MockJob').perform = (job, cb) => {
       job.data.should.eql({ key1: 'val1' });

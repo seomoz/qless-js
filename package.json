@@ -4,7 +4,7 @@
   "description": "Qless binding for JS",
   "scripts": {
     "lint": "node_modules/.bin/eslint --env node lib",
-    "test": "node_modules/.bin/_mocha -- -- $(find test/unit test/integration -name '*.js')"
+    "test": "DEBUG='qless:*' node_modules/.bin/_mocha -- -- $(find test/unit test/integration -name '*.js')"
   },
   "repository": {
     "type": "git",

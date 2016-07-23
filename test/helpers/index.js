@@ -1,7 +1,6 @@
 'use strict';
 
 process.env.NODE_ENV = 'test';
-process.env.DEBUG = '*';
 
 const chai = require('chai'),
     _ = require('lodash');
