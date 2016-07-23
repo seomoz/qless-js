@@ -1,22 +1,13 @@
-/*
-module.exports = {
-  perform(job, cb) {
-    console.log(`Performing job with foo=${job.data.foo}... please wait!`);
-    setTimeout(() => {
-      console.log(`I'm out of here! Done with foo=${job.data.foo}`);
-      cb();
-    }, 1000);
-  }
-}
-*/
+'use strict';
 
-module.exports = {
-  perform(job, cb) {
-    console.log(`Performing job with foo=${job.data.foo}... please wait!`);
-    setTimeout(() => {
-      console.log(`I'm out of here! Done with foo=${job.data.foo}`);
-      cb(new Error('wtf'));
-      //cb('wtf');
-    }, 1000);
-  }
-}
+const Promise = require('bluebird');
+
+function *perform(job) {
+  console.log(`Performing job with foo=${job.data.foo}... please wait!`);
+  yield Promise.delay(2000);
+  console.log(`I'm out of here! Done with foo=${job.data.foo}`);
+  throw new Error('wombat power!');
+};
+
+module.exports = require('./generator2job')(perform);
+
