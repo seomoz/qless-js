@@ -5,19 +5,18 @@ require('../helpers');
 describe('qless job integration test', () => {
   const queue = qlessClient.queue('my_test_queue');
 
-  before(() => { qless.klassFinder.setModuleDir(__dirname + '/jobs') });
-
-  beforeEach(cb => {
-    // queue should be empty.
-    queue.pop((err, job) => {
-      expect(err).to.be.null;
-      expect(job).to.be.null;
-      cb();
-    });
+  before(() => {
+    qless.klassFinder.setModuleDir(__dirname + '/jobs');
+    bluebird.promisifyAll(queue);
   });
 
-  beforeEach(cb => {
-    queue.put('MockJob', { key1: 'val1' }, {}, cb);
+  beforeEach(function *() {
+    expect(yield queue.popAsync()).to.be.null;
+    yield queue.putAsync('MockJob', {key1: 'val1'}, {});
+
+    expect(yield queue.runningAsync(null, null)).to.eql([]);
+    expect(yield queue.scheduledAsync(null, null)).to.eql([]);
+    expect(yield queue.stalledAsync(null, null)).to.eql([]);
   });
 
   it('works when the job succeeds', done => {
@@ -27,19 +26,24 @@ describe('qless job integration test', () => {
       job.data.should.eql({ key1: 'val1' });
       // TODO: test one is in "running" state
 
+
       // Set worker's run function to effectively check a couple
       // things and then shutdown the worker.
-      worker.run = runCb => {
-        // check queue should be empty
-        queue.pop((err, job) => {
-          expect(err).to.be.null;
-          expect(job).to.be.null;
-          // TODO TODO: check no running, stalled, or failed jobs
-          done();
-        });
-      };
+      worker.run = runCb => co(function *() {
+        expect(yield queue.popAsync()).to.be.null;
+        expect(yield queue.runningAsync(null, null)).to.eql([]);
+        expect(yield queue.scheduledAsync(null, null)).to.eql([]);
+        expect(yield queue.stalledAsync(null, null)).to.eql([]);
+      }).then(done, done);
 
-      cb(); // control will get back to run
+      // Do some checks and give control back to "run".
+      // Unless a check fails, then fail test with an error.
+      co(function *() {
+        expect(yield queue.popAsync()).to.be.null;
+        expect(yield queue.runningAsync(null, null)).to.eql([job.jid]);
+        expect(yield queue.scheduledAsync(null, null)).to.eql([]);
+        expect(yield queue.stalledAsync(null, null)).to.eql([]);
+      }).then(val => cb(), err => { done(err) });
     };
 
     worker.run(err => {

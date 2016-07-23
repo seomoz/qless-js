@@ -36,10 +36,13 @@
     "redis": "2.6.2"
   },
   "devDependencies": {
+    "bluebird": "^3.4.1",
     "chai": "3.5.0",
+    "co": "^4.6.0",
     "eslint": "1.10.3",
     "eslint-config-airbnb": "2.1.1",
     "istanbul": "0.4.4",
-    "mocha": "2.5.3"
+    "mocha": "2.5.3",
+    "mocha-co": "^1.17.1-co.1"
   }
 }

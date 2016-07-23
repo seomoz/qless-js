@@ -1,9 +1,13 @@
 'use strict';
 
+require('mocha-co');
+
 process.env.NODE_ENV = 'test';
 
-const chai = require('chai'),
-    _ = require('lodash');
+const chai = require('chai');
+const _ = require('lodash');
+const bluebird = require('bluebird');
+const co = require('co');
 
 const expect = chai.expect;
 chai.should();
@@ -19,4 +23,5 @@ global.expect = chai.expect;
 global._ = _;
 global.qless = qless;
 global.qlessClient = qlessClient;
-
+global.bluebird = bluebird;
+global.co = co;
