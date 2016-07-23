@@ -3,6 +3,7 @@
 process.env.DEBUG = '*'; // this may change in the future
 const qless = require('../../qless');
 
+//qless.klassFinder.setModuleDir(__dirname + '/bogus/jobs'); // uncomment to test "class not found" error
 qless.klassFinder.setModuleDir(__dirname + '/jobs');
 const client = new qless.Client();
 const worker = new qless.SerialWorker('myqueue', client);
