@@ -8,6 +8,7 @@ describe('qless job integration test', () => {
   before(() => {
     qless.klassFinder.setModuleDir(__dirname + '/jobs');
     bluebird.promisifyAll(queue);
+    bluebird.promisifyAll(qlessClient.jobs);
   });
 
   beforeEach(function *() {
@@ -17,6 +18,7 @@ describe('qless job integration test', () => {
     expect(yield queue.runningAsync(null, null)).to.eql([]);
     expect(yield queue.scheduledAsync(null, null)).to.eql([]);
     expect(yield queue.stalledAsync(null, null)).to.eql([]);
+    expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({});
   });
 
   it('works when the job succeeds', done => {
@@ -34,6 +36,7 @@ describe('qless job integration test', () => {
         expect(yield queue.runningAsync(null, null)).to.eql([]);
         expect(yield queue.scheduledAsync(null, null)).to.eql([]);
         expect(yield queue.stalledAsync(null, null)).to.eql([]);
+        expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({});
       }).then(done, done);
 
       // Do some checks and give control back to "run".
@@ -43,6 +46,7 @@ describe('qless job integration test', () => {
         expect(yield queue.runningAsync(null, null)).to.eql([job.jid]);
         expect(yield queue.scheduledAsync(null, null)).to.eql([]);
         expect(yield queue.stalledAsync(null, null)).to.eql([]);
+        expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({});
       }).then(val => cb(), err => { done(err) });
     };
 
