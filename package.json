@@ -4,7 +4,7 @@
   "description": "Qless binding for JS",
   "scripts": {
     "lint": "node_modules/.bin/eslint --env node lib",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node_modules/.bin/_mocha -- -- $(find test/unit test/integration -name '*.js')"
   },
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
       "email": "evan@moz.com"
     },
     {
-      "name": "Dan Lecocq and other contributors of qless-py",
+      "name": "Dan Lecocq and other contributors of qless-core, qless-py, and qless Ruby",
       "email": "dan@moz.com"
     },
     {
