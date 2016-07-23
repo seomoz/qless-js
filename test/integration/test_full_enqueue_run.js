@@ -21,7 +21,7 @@ describe('qless job integration test', () => {
     expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({});
   });
 
-  it('works when the job succeeds', done => {
+  it('leaves no running/scheduled/stalled/failed jobs when the job succeeds', done => {
     const worker = new qless.SerialWorker('my_test_queue', qlessClient);
 
     require('./jobs/MockJob').perform = (job, cb) => {
@@ -55,6 +55,48 @@ describe('qless job integration test', () => {
       done(err);
     });
   });
+
+  it('leaves no running/scheduled/stalled but 1 failed job when the job fails', done => {
+    const worker = new qless.SerialWorker('my_test_queue', qlessClient);
+
+    const wombatError = new Error("wombat attack!");
+    wombatError.name = "WombatError";
+
+    require('./jobs/MockJob').perform = (job, cb) => {
+      job.data.should.eql({ key1: 'val1' });
+      // TODO: test one is in "running" state
+
+
+      // Set worker's run function to effectively check a couple
+      // things and then shutdown the worker.
+      worker.run = runCb => co(function *() {
+        expect(yield queue.popAsync()).to.be.null;
+        expect(yield queue.runningAsync(null, null)).to.eql([]);
+        expect(yield queue.scheduledAsync(null, null)).to.eql([]);
+        expect(yield queue.stalledAsync(null, null)).to.eql([]);
+        expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({
+          WombatError: 1,
+        });
+      }).then(done, done);
+
+      // Do some checks and give control back to "run",
+      // this time failing the job with an error
+      // Unless a check fails, then fail test with an error.
+      co(function *() {
+        expect(yield queue.popAsync()).to.be.null;
+        expect(yield queue.runningAsync(null, null)).to.eql([job.jid]);
+        expect(yield queue.scheduledAsync(null, null)).to.eql([]);
+        expect(yield queue.stalledAsync(null, null)).to.eql([]);
+        expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({});
+      }).then(val => cb(wombatError), err => { done(err) });
+    };
+
+    worker.run(err => {
+      console.log("ERROR IN WORKER: ", err);
+      done(err);
+    });
+  });
+
 
 });
 
