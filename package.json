@@ -21,7 +21,10 @@
     "redis": "^2.6.2"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
     "eslint": "1.10.3",
-    "eslint-config-airbnb": "2.1.1"
+    "eslint-config-airbnb": "2.1.1",
+    "istanbul": "^0.4.4",
+    "mocha": "^2.5.3"
   }
 }
