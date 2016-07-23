@@ -12,7 +12,7 @@ const co = require('co');
 const expect = chai.expect;
 chai.should();
 
-const qless = require('../../qless');
+const qless = require('../qless');
 
 const redisInfo = { db: 11 };
 const qlessClient = new qless.Client(redisInfo);

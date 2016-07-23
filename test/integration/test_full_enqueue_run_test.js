@@ -1,7 +1,5 @@
 'use strict';
 
-require('../helpers');
-
 describe('qless job integration test', () => {
   const queue = qlessClient.queue('my_test_queue');
 
