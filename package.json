@@ -10,21 +10,36 @@
     "type": "git",
     "url": "git+https://github.com/seomoz/qjess.git"
   },
-  "author": "",
+  "author": "Evan Battaglia",
+  "contributors": [
+    {
+      "name": "Evan Battaglia",
+      "email": "evan@moz.com"
+    },
+    {
+      "name": "Dan Lecocq and other contributors of qless-py",
+      "email": "dan@moz.com"
+    },
+    {
+      "name": "Myron Marston and other contritubutors of qless Ruby",
+      "email": "myron@moz.com"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/seomoz/qjess/issues"
   },
   "homepage": "https://github.com/seomoz/qjess#readme",
+  "main": "qless.js",
   "dependencies": {
-    "debug": "^2.2.0",
-    "lodash": "^4.13.1",
-    "redis": "^2.6.2"
+    "debug": "2.2.0",
+    "lodash": "4.13.1",
+    "redis": "2.6.2"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
+    "chai": "3.5.0",
     "eslint": "1.10.3",
     "eslint-config-airbnb": "2.1.1",
-    "istanbul": "^0.4.4",
-    "mocha": "^2.5.3"
+    "istanbul": "0.4.4",
+    "mocha": "2.5.3"
   }
 }
