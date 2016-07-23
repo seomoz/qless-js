@@ -16,6 +16,7 @@
   },
   "homepage": "https://github.com/seomoz/qjess#readme",
   "dependencies": {
+    "lodash": "^4.13.1",
     "redis": "^2.6.2"
   },
   "devDependencies": {
