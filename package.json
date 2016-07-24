@@ -5,7 +5,8 @@
   "scripts": {
     "coverage": "istanbul cover -- node_modules/.bin/_mocha --recursive && bash .istanbul-check-coverage.sh",
     "lint": "node_modules/.bin/eslint --env node lib",
-    "test": "DEBUG='qless:*' node_modules/.bin/_mocha --recursive"
+    "test": "DEBUG='qless:*' node_modules/.bin/_mocha --recursive",
+    "travis": "npm run coverage && npm run lint && echo && echo ----------------- && echo 'Everything OK! You are good to commit.'"
   },
   "repository": {
     "type": "git",
