@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Qless binding for JS",
   "scripts": {
+    "coverage": "istanbul cover -- node_modules/.bin/_mocha --recursive && bash .istanbul-check-coverage.sh",
     "lint": "node_modules/.bin/eslint --env node lib",
     "test": "DEBUG='qless:*' node_modules/.bin/_mocha --recursive"
   },

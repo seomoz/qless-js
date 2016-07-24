@@ -17,6 +17,7 @@ const qless = require('../qless');
 const redisInfo = { db: 11 };
 const qlessClient = new qless.Client(redisInfo);
 beforeEach(cb => qlessClient.redis.flushdb(cb));
+beforeEach(cb => qlessClient.redis.script('flush', cb));
 
 global.chai = chai;
 global.expect = chai.expect;
