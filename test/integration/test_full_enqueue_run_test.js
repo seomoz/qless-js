@@ -3,7 +3,7 @@
 describe('qless job integration test', () => {
   const queue = qlessClient.queue('my_test_queue');
 
-  before(() => {
+  beforeEach(() => {
     qless.klassFinder.setModuleDir(__dirname + '/jobs');
     bluebird.promisifyAll(queue);
     bluebird.promisifyAll(qlessClient.jobs);
@@ -24,8 +24,6 @@ describe('qless job integration test', () => {
 
     require('./jobs/MockJob').perform = (job, cb) => {
       job.data.should.eql({ key1: 'val1' });
-      // TODO: test one is in "running" state
-
 
       // Set worker's run function to effectively check a couple
       // things and then shutdown the worker.
@@ -62,8 +60,6 @@ describe('qless job integration test', () => {
 
     require('./jobs/MockJob').perform = (job, cb) => {
       job.data.should.eql({ key1: 'val1' });
-      // TODO: test one is in "running" state
-
 
       // Set worker's run function to effectively check a couple
       // things and then shutdown the worker.
@@ -100,7 +96,6 @@ describe('qless job integration test', () => {
 
     require('./jobs/MockJob').perform = (job, cb) => {
       job.data.should.eql({ key1: 'val1' });
-      // TODO: test one is in "running" state
 
 
       // Set worker's run function to effectively check a couple
@@ -136,7 +131,33 @@ describe('qless job integration test', () => {
     });
   });
 
-  it('leaves no running/scheduled/stalled but 1 failed job when the job class cannot be found');
+  context('when the job class cannot be found', () => {
+    beforeEach(() => {
+      qless.klassFinder.setModuleDir(__dirname + '/jobs-this-dir-doesnt-exist');
+    });
+
+    it('leaves no running/scheduled/stalled but 1 failed job when the job class cannot be found', done => {
+      const worker = new qless.SerialWorker('my_test_queue', qlessClient, { interval: 20 /* ms */ });
+
+      worker.run(err => {
+        console.log("ERROR IN WORKER: ", err);
+        done(err);
+      });
+
+      co(function *() {
+        // wait 200 ms (job should be done by then), then check some stuff
+        // then stop worker
+        yield bluebird.delay(60);
+        expect(yield queue.popAsync()).to.be.null;
+        expect(yield queue.runningAsync(null, null)).to.eql([]);
+        expect(yield queue.scheduledAsync(null, null)).to.eql([]);
+        expect(yield queue.stalledAsync(null, null)).to.eql([]);
+        expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({ "Class not found": 1 });
+      }).then(() => {
+        worker.run = errorCb => done(); // cut off worker on next iteration and complete test
+      }).catch(err => done(err));
+    });
+  });
 
 });
 
