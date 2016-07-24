@@ -131,6 +131,46 @@ describe('qless job integration test', () => {
     });
   });
 
+  it('leaves no running/scheduled/stalled but 1 failed job when the job fails by calling job.fail() AND returns an error', done => {
+    const worker = new qless.SerialWorker('my_test_queue', qlessClient);
+
+    require('./jobs/MockJob').perform = (job, cb) => {
+      job.data.should.eql({ key1: 'val1' });
+
+
+      // Set worker's run function to effectively check a couple
+      // things and then shutdown the worker.
+      worker.run = runCb => co(function *() {
+        expect(yield queue.popAsync()).to.be.null;
+        expect(yield queue.runningAsync(null, null)).to.eql([]);
+        expect(yield queue.scheduledAsync(null, null)).to.eql([]);
+        expect(yield queue.stalledAsync(null, null)).to.eql([]);
+        expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({
+          MyReason: 1,
+        });
+      }).then(done, done);
+
+      // Do some checks and give control back to "run",
+      // this time failing the job with an error
+      // Unless a check fails, then fail test with an error.
+      co(function *() {
+        expect(yield queue.popAsync()).to.be.null;
+        expect(yield queue.runningAsync(null, null)).to.eql([job.jid]);
+        expect(yield queue.scheduledAsync(null, null)).to.eql([]);
+        expect(yield queue.stalledAsync(null, null)).to.eql([]);
+        expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({});
+
+        bluebird.promisifyAll(job);
+        yield job.failAsync('MyReason', 'my great reason to fail');
+      }).then(val => cb('Another error'), err => { done(err) });
+    };
+
+    worker.run(err => {
+      console.log("ERROR IN WORKER: ", err);
+      done(err);
+    });
+  });
+
   context('when the job class cannot be found', () => {
     beforeEach(() => {
       qless.klassFinder.setModuleDir(__dirname + '/jobs-this-dir-doesnt-exist');
