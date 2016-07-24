@@ -166,7 +166,7 @@ describe('qless job integration test', () => {
     };
 
     worker.run(err => {
-      console.log("ERROR IN WORKER: ", err);
+      console.log("ERROR in worker!", err);
       done(err);
     });
   });
@@ -192,7 +192,7 @@ describe('qless job integration test', () => {
         expect(yield queue.runningAsync(null, null)).to.eql([]);
         expect(yield queue.scheduledAsync(null, null)).to.eql([]);
         expect(yield queue.stalledAsync(null, null)).to.eql([]);
-        expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({ "Class not found": 1 });
+        expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({ "qless.errors.ClassNotFound": 1 });
       }).then(() => {
         worker.run = errorCb => done(); // cut off worker on next iteration and complete test
       }).catch(err => done(err));
