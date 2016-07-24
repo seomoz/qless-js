@@ -8,5 +8,5 @@
 # TODO: improve these thresholds
 
 cd "$( dirname "${BASH_SOURCE[0]}" )"
-node_modules/.bin/istanbul check-coverage --statement 87 --branch 80 --function 95 --line 93
+node_modules/.bin/istanbul check-coverage --statement 88 --branch 80 --function 95 --line 93
 
