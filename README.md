@@ -94,3 +94,10 @@ function *perform(job) {
 module.exports = require('./generator2job')(perform);
 ```
 
+### Updating Qless Lua scripts
+This repo contains a compiled version of the qless lua scripts in source
+control. It also contains a link to the main qless-core repo as a
+submodule. If the upstream qless-core scripts change, you can recompile
+the lua scripts with a `npm run build`. You may have to pull the latest
+version of the qless-core scripts first by doing a `git pull` in the
+`qless-core` directory.
