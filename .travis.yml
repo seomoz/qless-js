@@ -1,0 +1,15 @@
+sudo: required
+dist: trusty
+language: node_js
+node_js:
+  - "4"
+  - "6"
+before_install:
+  - git submodule update --init --recursive
+  - 'cd qless-core && make'
+  - npm install
+script:
+  - npm run coverage
+  - npm run lint
+services:
+  - redis
