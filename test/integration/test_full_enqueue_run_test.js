@@ -4,9 +4,8 @@ describe('qless job integration test', () => {
   const queue = qlessClient.queue('my_test_queue');
 
   beforeEach(() => {
-    qless.klassFinder.setModuleDir(__dirname + '/jobs');
+    qless.klassFinder.setModuleDir(__dirname + '/../jobs');
     bluebird.promisifyAll(queue);
-    bluebird.promisifyAll(qlessClient.jobs);
   });
 
   beforeEach(function *() {
@@ -22,7 +21,7 @@ describe('qless job integration test', () => {
   it('leaves no running/scheduled/stalled/failed jobs when the job succeeds', done => {
     const worker = new qless.SerialWorker('my_test_queue', qlessClient);
 
-    require('./jobs/MockJob').perform = (job, cb) => {
+    require('../jobs/MockJob').perform = (job, cb) => {
       job.data.should.eql({ key1: 'val1' });
 
       // Set worker's run function to effectively check a couple
@@ -58,7 +57,7 @@ describe('qless job integration test', () => {
     const wombatError = new Error("wombat attack!");
     wombatError.name = "WombatError";
 
-    require('./jobs/MockJob').perform = (job, cb) => {
+    require('../jobs/MockJob').perform = (job, cb) => {
       job.data.should.eql({ key1: 'val1' });
 
       // Set worker's run function to effectively check a couple
@@ -94,7 +93,7 @@ describe('qless job integration test', () => {
   it('leaves no running/scheduled/stalled but 1 failed job when the job fails by calling job.fail()', done => {
     const worker = new qless.SerialWorker('my_test_queue', qlessClient);
 
-    require('./jobs/MockJob').perform = (job, cb) => {
+    require('../jobs/MockJob').perform = (job, cb) => {
       job.data.should.eql({ key1: 'val1' });
 
 
@@ -134,7 +133,7 @@ describe('qless job integration test', () => {
   it('leaves no running/scheduled/stalled but 1 failed job when the job fails by calling job.fail() AND returns an error', done => {
     const worker = new qless.SerialWorker('my_test_queue', qlessClient);
 
-    require('./jobs/MockJob').perform = (job, cb) => {
+    require('../jobs/MockJob').perform = (job, cb) => {
       job.data.should.eql({ key1: 'val1' });
 
 

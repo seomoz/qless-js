@@ -20,6 +20,7 @@ const qlessClient = new qless.Client(redisInfo);
 bluebird.promisifyAll(qlessClient.jobs);
 beforeEach(cb => qlessClient.redis.flushdb(cb));
 beforeEach(cb => qlessClient.redis.script('flush', cb));
+beforeEach(() => qless.klassFinder.setModuleDir(__dirname + '/jobs'));
 
 // Set all to be globals
 global.chai = chai;
