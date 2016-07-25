@@ -1,3 +1,9 @@
+![Status: Incubation](https://img.shields.io/badge/status-incubation-green.svg?style=flat)
+![Team: Shared Services](https://img.shields.io/badge/team-shared_services-green.svg?style=flat)
+![Product: Keyword Explorer](https://img.shields.io/badge/product-keyword_explorer-blue.svg?style=flat)
+![Open Source](https://img.shields.io/badge/open_source-yes-green.svg?style=flat)
+![Critical: No](https://img.shields.io/badge/critical-no-green.svg?style=flat)
+
 Requires Node >= 4, or Babel.
 
 ### Example
