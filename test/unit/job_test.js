@@ -46,7 +46,7 @@ describe('qless.Job', () => {
     const job = yield fooQueue.popAsync();
     yield co.wrap(cb => {
       job.perform((err, val) => {
-        err.should.be.an.instanceof(qless.errors.ClassNotFound);
+        err.should.be.an.instanceof(qless.errors.CouldntLoadClass);
         cb();
       });
     });

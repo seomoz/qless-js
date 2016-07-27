@@ -5,7 +5,7 @@ describe('qless.errors', () => {
 
   it('can be tested with instanceof', () => {
     expect(lseErr instanceof qless.errors.LuaScriptError).to.eql(true);
-    expect(lseErr instanceof qless.errors.ClassNotFound).to.eql(false);
+    expect(lseErr instanceof qless.errors.CouldntLoadClass).to.eql(false);
   });
 
   it('has a descriptive name', () => {
