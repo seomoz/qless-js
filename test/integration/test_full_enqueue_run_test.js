@@ -5,7 +5,6 @@ describe('qless job integration test', () => {
 
   beforeEach(() => {
     qless.klassFinder.setModuleDir(__dirname + '/../jobs');
-    bluebird.promisifyAll(queue);
   });
 
   beforeEach(function *() {
@@ -119,7 +118,6 @@ describe('qless job integration test', () => {
         expect(yield queue.stalledAsync(null, null)).to.eql([]);
         expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({});
 
-        bluebird.promisifyAll(job);
         yield job.failAsync('MyReason', 'my great reason to fail');
       }).then(val => cb(), err => { done(err) });
     };
@@ -159,7 +157,6 @@ describe('qless job integration test', () => {
         expect(yield queue.stalledAsync(null, null)).to.eql([]);
         expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({});
 
-        bluebird.promisifyAll(job);
         yield job.failAsync('MyReason', 'my great reason to fail');
       }).then(val => cb('Another error'), err => { done(err) });
     };

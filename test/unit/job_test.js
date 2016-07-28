@@ -2,7 +2,6 @@
 
 describe('qless.Job', () => {
   const fooQueue = qlessClient.queue('foo');
-  bluebird.promisifyAll(fooQueue);
 
   it('has all the basic attributes we would expect', function *() {
     yield fooQueue.putAsync('Foo', {'whiz': 'bang'}, {jid:'jid', tags: ['foo'], retries: 3});
@@ -29,7 +28,6 @@ describe('qless.Job', () => {
   it("Able to complete a job", function *() {
     yield fooQueue.putAsync('Foo', {}, {jid: 'jid'});
     const job1 = yield fooQueue.popAsync();
-    bluebird.promisifyAll(job1);
     yield job1.completeAsync();
     const job2 = yield qlessClient.jobs.getAsync('jid');
     job2.state.should.eql('complete');
