@@ -4,7 +4,7 @@
 ![Open Source](https://img.shields.io/badge/open_source-yes-green.svg?style=flat)
 ![Critical: No](https://img.shields.io/badge/critical-no-green.svg?style=flat)
 
-Requires Node >= 4, or Babel.
+Requires Node >= 4, or Babel. (Note that Node 0.12's end of life is December 2016.)
 
 ### Example
 #### Example enqueuer
