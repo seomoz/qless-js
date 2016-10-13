@@ -6,6 +6,8 @@
 
 Requires Node >= 4, or Babel. (Note that Node 0.12's end of life is December 2016.)
 
+Note: this is an incomplete port. As of October 2016 it contains only a few core Qless features (e.g., enqueueing, processing, succeeding, and failing jobs). However these are tested and should be usable. See [TODO](TODO.md) for missing features. Development is stalled as of October 2016, but should hopefully resume in the future. Perhaps this will be useful to someone, and everyone should feel free to contributing and submit PRs.
+
 ### Example
 #### Example enqueuer
 ```javascript
