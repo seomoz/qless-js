@@ -1,0 +1,61 @@
+{
+  "name": "qless-js",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Qless JavaScript Bindings",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "lint": "eslint --ext .js bin lib test",
+    "test": "jest --runInBand"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/seomoz/qless-js"
+  },
+  "author": "Moz",
+  "contributors": [
+    {
+      "name": "Evan Battaglia",
+      "email": "evan@moz.com"
+    },
+    {
+      "name": "Dan Lecocq and other contributors of qless-core, qless-py, and qless Ruby",
+      "email": "dlecocq@instructure.com"
+    },
+    {
+      "name": "Myron Marston and other contritubutors of qless Ruby",
+      "email": "myron@moz.com"
+    }
+  ],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "babel-core": "^6.20.0",
+    "babel-eslint": "^7.1.1",
+    "eslint": "^3.18.0",
+    "eslint-config-airbnb": "14.1.0",
+    "eslint-plugin-import": "2.2.0",
+    "jest": "^19.0.2"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!bin/**",
+      "!index.js",
+      "!**/node_modules/**",
+      "!coverage/**"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    }
+  }
+}

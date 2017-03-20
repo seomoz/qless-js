@@ -1,0 +1,10 @@
+# Ignore Nodejs things
+node_modules/
+npm-debug.log
+
+# Ignore generated files
+coverage/*
+
+# Ignore random files
+.DS_Store
+._DS_Store

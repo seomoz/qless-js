@@ -1,0 +1,20 @@
+{
+  "extends": "airbnb/base",
+  "rules": {
+    "strict": [0], // using node but not ES6 modules or Babel so want to use "use strict"
+    "no-console": [0], // not applicable -- using node
+    "no-else-return": [0], // we like to always use "return" with callback and this makes that more awkward
+    "no-param-reassign": [0], // I find this causes more bugs and makes more ugly code than it fixes
+    "prefer-spread": [0], // for compatability with <6
+    "prefer-rest-params": [0], // for compatability with <6
+    "arrow-body-style": ["warn", "as-needed"], // especially in tests, multiline single-return arrow functions are common
+    "quote-props": ["error", "consistent-as-needed"],
+  },
+  "parserOptions": {
+    "ecmaVersion": 6
+  },
+  "env": {
+    "node": true,
+    "jest": true
+  }
+}
