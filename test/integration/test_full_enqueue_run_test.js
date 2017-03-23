@@ -183,15 +183,17 @@ describe('qless job integration test', () => {
       co(function *() {
         // wait 200 ms (job should be done by then), then check some stuff
         // then stop worker
-        yield bluebird.delay(60);
+        yield bluebird.delay(200);
         expect(yield queue.popAsync()).to.be.null;
         expect(yield queue.runningAsync(null, null)).to.eql([]);
         expect(yield queue.scheduledAsync(null, null)).to.eql([]);
         expect(yield queue.stalledAsync(null, null)).to.eql([]);
         expect(yield qlessClient.jobs.failedCountsAsync()).to.eql({ "qless.errors.CouldntLoadClass": 1 });
       }).then(() => {
-        worker.run = errorCb => done(); // cut off worker on next iteration and complete test
-      }).catch(err => done(err));
+        done(); // cut off worker on next iteration and complete test
+      }).catch(err => {
+        done(err);
+      });
     });
   });
 
