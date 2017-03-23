@@ -16,7 +16,7 @@ chai.should();
 // Redis and Qless
 const qless = require('../qless');
 const redisInfo = { db: 11 };
-const qlessClient = new qless.Client({ host: '192.168.60.10', port: 6378, db: 0 });
+const qlessClient = new qless.Client({db: 11 });
 bluebird.promisifyAll(require('../lib/jobs'));
 bluebird.promisifyAll(require('../lib/queue'));
 bluebird.promisifyAll(require('../lib/job'));
