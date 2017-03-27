@@ -1,9 +1,0 @@
-{
-  "extends": "airbnb/base",
-  "rules": {
-    "strict": [0], // using node but not ES6 modules or Babel so want to use "use strict"
-    "no-console": [0], // not applicable -- using node
-    "no-else-return": [0], // we like to always use "return" with callback and this makes that more awkward
-    "no-param-reassign": [0], // I find this causes more bugs and makes more ugly code than it fixes
-  }
-}
