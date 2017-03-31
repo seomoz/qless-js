@@ -4,6 +4,9 @@
   "private": false,
   "description": "Qless JavaScript Bindings",
   "main": "index.js",
+  "bin": {
+    "qless-js-worker": "bin/qless-js-worker.js"
+  },
   "directories": {
     "test": "test"
   },
