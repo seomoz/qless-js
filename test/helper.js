@@ -1,38 +1,46 @@
 'use strict';
 
-process.env.NODE_ENV = 'test';
+const Promise = require('bluebird').Promise;
 
-// Misc Utils
-const _ = require('lodash');
-const bluebird = require('bluebird');
-const co = require('co');
+class Cleaner {
 
-// Testing Stuff
-require('mocha-co');
-const chai = require('chai');
-const expect = chai.expect;
-chai.should();
+  constructor(client) {
+    this.client = client;
+    this.empty = false;
+  }
 
-// Redis and Qless
-const qless = require('../qless');
-const redisInfo = { db: 11 };
-const qlessClient = new qless.Client({ db: 11 });
-bluebird.promisifyAll(require('../lib/jobs'));
-bluebird.promisifyAll(require('../lib/queue'));
-bluebird.promisifyAll(require('../lib/job'));
-bluebird.promisifyAll(qlessClient.redis);
+  before() {
+    const self = this;
+    return self.client.redis.keysAsync('*')
+      .then((keys) => {
+        if (keys.length > 0) {
+          throw Error('Redis database not empty.');
+        }
+        self.empty = true;
+      });
+  }
 
-beforeEach(function *() {
-  yield qlessClient.redis.flushdbAsync();
-  yield qlessClient.redis.scriptAsync('flush');
-  qless.klassFinder.setModuleDir(__dirname + '/jobs');
-});
+  after() {
+    if (this.empty) {
+      return this.client.redis.flushdbAsync();
+    } else {
+      console.log('Not flushing db because it was not empty.');
+      return null;
+    }
+  }
+}
 
-// Set all to be globals
-global.chai = chai;
-global.expect = chai.expect;
-global._ = _;
-global.qless = qless;
-global.qlessClient = qlessClient;
-global.bluebird = bluebird;
-global.co = co;
+const stubDisposer = (obj, prop, stub) => {
+  const original = obj[prop];
+  return Promise.try(() => {
+    obj[prop] = stub;
+    return stub;
+  }).disposer(() => {
+    obj[prop] = original;
+  });
+};
+
+module.exports = {
+  Cleaner,
+  stubDisposer,
+};

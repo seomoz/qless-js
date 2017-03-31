@@ -2,14 +2,14 @@ sudo: required
 dist: trusty
 language: node_js
 node_js:
-  - "4.4.4"
+  - "4"
+  - "5"
   - "6"
+  - "7"
 before_install:
-  - git submodule update --init --recursive
-  - 'cd qless-core && make'
-  - npm install
+  - yarn run build
 script:
-  - npm run coverage
-  - npm run lint
+  - yarn run test
+  - yarn run lint
 services:
   - redis

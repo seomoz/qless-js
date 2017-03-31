@@ -1,19 +1,25 @@
 {
-  "name": "qless",
-  "version": "0.0.1",
-  "description": "Qless binding for JS",
+  "name": "qless-js",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Qless JavaScript Bindings",
+  "main": "index.js",
+  "bin": {
+    "qless-js-worker": "bin/qless-js-worker.js"
+  },
+  "directories": {
+    "test": "test"
+  },
   "scripts": {
-    "coverage": "istanbul cover -- node_modules/.bin/_mocha --recursive && bash .istanbul-check-coverage.sh",
-    "lint": "node_modules/.bin/eslint --env node lib",
-    "test": "DEBUG='qless:*' node_modules/.bin/_mocha --recursive",
-    "build": "git submodule init && git submodule update && cd qless-core && make clean && make && cp qless.lua qless-lib.lua ../qless-lua && echo && echo ==================== && echo && echo Lua scripts successfully rebuilt!",
-    "travis": "npm run coverage && npm run lint && echo && echo ----------------- && echo 'Everything OK! You are good to commit.'"
+    "lint": "eslint --ext .js bin lib test",
+    "test": "jest --runInBand",
+    "build": "git submodule update --init --recursive && make -C lib/qless-core clean all"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/seomoz/qless-js.git"
+    "url": "http://github.com/seomoz/qless-js"
   },
-  "author": "Evan Battaglia",
+  "author": "Moz",
   "contributors": [
     {
       "name": "Evan Battaglia",
@@ -21,31 +27,49 @@
     },
     {
       "name": "Dan Lecocq and other contributors of qless-core, qless-py, and qless Ruby",
-      "email": "dan@moz.com"
+      "email": "dlecocq@instructure.com"
     },
     {
       "name": "Myron Marston and other contritubutors of qless Ruby",
       "email": "myron@moz.com"
     }
   ],
-  "bugs": {
-    "url": "https://github.com/seomoz/qless-js/issues"
-  },
-  "homepage": "https://github.com/seomoz/qless-js#readme",
-  "main": "qless.js",
+  "license": "MIT",
   "dependencies": {
-    "debug": "2.2.0",
-    "lodash": "4.13.1",
-    "redis": "2.6.2"
+    "bluebird": "^3.5.0",
+    "commander": "^2.9.0",
+    "double-ended-queue": "^2.1.0-0",
+    "redis": "^2.7.1",
+    "uuid": "^3.0.1",
+    "winston": "^2.3.1"
   },
   "devDependencies": {
-    "bluebird": "3.4.1",
-    "chai": "3.5.0",
-    "co": "4.6.0",
-    "eslint": "1.10.3",
-    "eslint-config-airbnb": "2.1.1",
-    "istanbul": "0.4.4",
-    "mocha": "2.5.3",
-    "mocha-co": "1.17.1-co.1"
+    "babel-core": "^6.20.0",
+    "babel-eslint": "^7.1.1",
+    "eslint": "^3.18.0",
+    "eslint-config-airbnb": "14.1.0",
+    "eslint-plugin-import": "2.2.0",
+    "expect.js": "^0.3.1",
+    "jest": "^19.0.2",
+    "sinon": "^2.1.0"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!bin/**",
+      "!index.js",
+      "!**/node_modules/**",
+      "!coverage/**",
+      "!test/helper.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    }
   }
 }
