@@ -52,7 +52,8 @@
       "!bin/**",
       "!index.js",
       "!**/node_modules/**",
-      "!coverage/**"
+      "!coverage/**",
+      "!test/helper.js"
     ],
     "coverageThreshold": {
       "global": {
