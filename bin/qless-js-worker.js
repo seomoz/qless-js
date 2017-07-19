@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 
 const assert = require('assert');
+const os = require('os');
 const qless = require('../index.js');
 
 const commander = require('commander');
@@ -16,7 +17,7 @@ function increaseVerbosity(v, total) {
 
 commander
   .option('-r, --redis <url>', 'The redis:// url to connect to')
-  .option('-n, --name <name>', 'The name to identify your worker as')
+  .option('-n, --name <name>', 'The name to identify your worker as', os.hostname())
   .option('-d, --workdir <dir>', 'The base work directory path')
   .option('-c, --concurrency <n>', 'The number of concurrent jobs to run [default 10]')
   .option('-i, --interval <n>', 'Polling interval in seconds [default 60]', parseFloat)
