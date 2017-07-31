@@ -365,4 +365,39 @@ describe('Job', () => {
         expect(job.failure.group).to.eql('queue-Error');
       });
   });
+
+  describe('heartbeatUntilPromise', () => {
+    const heartbeat = 2;
+    const delay = 3.5;
+    const padding = 1;
+
+    it('can heartbeat until a promise resolves', () => {
+      return queue.setHeartbeat(heartbeat)
+        .then(() => queue.put({ klass: 'Klass' }))
+        .then(() => queue.pop())
+        .then((job) => {
+          const promise = Promise.delay(delay * 1000).then(() => job.complete());
+          return job.heartbeatUntilPromise(promise, padding).return(job);
+        })
+        .then(job => client.job(job.jid))
+        .then(job => expect(job.state).to.eql('complete'));
+    });
+
+    it('can heartbeat until a promise rejects', (done) => {
+      return queue.setHeartbeat(heartbeat)
+        .then(() => queue.put({ klass: 'Klass' }))
+        .then(() => queue.pop())
+        .then((job) => {
+          const promise = Promise.delay(delay * 1000).then(() => Promise.reject(Error('kaboom')));
+          return job.heartbeatUntilPromise(promise, padding).return(job);
+        })
+        .catch(() => done()); // TODO(dan): Assertion about the type of error here
+    });
+
+    it('returns quickly if the provided promise does', () => {
+      return queue.put({ klass: 'Klass' })
+        .then(() => queue.pop())
+        .then(job => job.heartbeatUntilPromise(job.complete()));
+    });
+  });
 });
