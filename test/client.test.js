@@ -1,5 +1,7 @@
 'use strict';
 
+const Promise = require('bluebird');
+
 const expect = require('expect.js');
 const Client = require('../lib/client.js');
 const helper = require('./helper.js');
@@ -37,6 +39,40 @@ describe('Qless client', () => {
       workerName: 'my-worker-name',
     };
     return Client.using(config, local => local.redis.infoAsync());
+  });
+
+  describe('with several jobs', () => {
+    const jids = ['one', 'two', 'three'];
+
+    beforeEach(() => {
+      return Promise.map(jids, (jid) => {
+        return client.queue('queue').put({
+          klass: 'klass',
+          jid,
+        });
+      });
+    });
+
+    it('can track jobs in bulk', () => {
+      return client.track('one', 'two', 'three')
+        .then(() => Promise.map(jids, jid => client.job(jid)))
+        .then(jobs => jobs.map(job => job.tracked))
+        .then(tracked => expect(tracked).to.eql([true, true, true]));
+    });
+
+    it('can untrack jobs in bulk', () => {
+      return client.track('one', 'two', 'three')
+        .then(() => client.untrack('one', 'two', 'three'))
+        .then(() => Promise.map(jids, jid => client.job(jid)))
+        .then(jobs => jobs.map(job => job.tracked))
+        .then(tracked => expect(tracked).to.eql([false, false, false]));
+    });
+
+    it('can cancel jobs in bulk', () => {
+      return client.cancel('one', 'two', 'three')
+        .then(() => Promise.map(jids, jid => client.job(jid)))
+        .then(jobs => expect(jobs).to.eql([null, null, null]));
+    });
   });
 
   it('can set config', () => {
