@@ -30,7 +30,7 @@ describe('Single Worker', () => {
   afterAll(() => client.quit());
 
   it('uses default interval', () => {
-    expect(new Worker(client, {}).popper.interval).to.eql(60000);
+    expect(new Worker(client, {}).interval).to.eql(60000);
   });
 
   it('can run jobs', () => {

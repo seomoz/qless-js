@@ -33,7 +33,7 @@ describe('Multi Worker', () => {
 
   it('uses default interval', () => {
     worker = new Worker(client, { count: capacity });
-    expect(worker.popper.interval).to.eql(60000);
+    expect(worker.interval).to.eql(60000);
   });
 
   it('can run jobs', () => {
