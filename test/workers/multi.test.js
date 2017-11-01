@@ -50,6 +50,33 @@ describe('Multi Worker', () => {
     });
   });
 
+  it('remains saturated with max-concurrency', () => {
+    // This test will put several jobs in the queue and
+    const jids = ['one', 'two', 'three', 'four', 'five'];
+    let count = jids.length;
+    const klass = {
+      queue: job => Promise.delay(1)
+        .then(() => job.complete())
+        .then(() => {
+          count -= 1;
+          if (count === 0) {
+            worker.stop();
+          }
+        }),
+    };
+    const disposer = helper.stubDisposer(Job, 'import', sinon.stub());
+    return Promise.using(disposer, (stub) => {
+      stub.returns(klass);
+      const before = Date.now();
+
+      return Promise.map(jids, jid => queue.put({ klass: 'Klass', jid }))
+        .then(() => client.setConfig('queue-max-concurrency', 1))
+        .then(() => worker.run())
+        .then(() => Date.now() - before)
+        .then(diff => expect(diff).to.be.lessThan(interval));
+    });
+  });
+
   it('runs multiple jobs concurrently', () => {
     const factor = 3;
     const delay = 1000;
