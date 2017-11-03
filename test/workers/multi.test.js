@@ -33,7 +33,7 @@ describe('Multi Worker', () => {
 
   it('uses default interval', () => {
     worker = new Worker(client, { count: capacity });
-    expect(worker.popper.interval).to.eql(60000);
+    expect(worker.interval).to.eql(60000);
   });
 
   it('can run jobs', () => {
@@ -47,6 +47,33 @@ describe('Multi Worker', () => {
         .then(() => worker.run())
         .then(() => client.job('jid'))
         .then(job => expect(job.state).to.eql('complete'));
+    });
+  });
+
+  it('remains saturated with max-concurrency', () => {
+    // This test will put several jobs in the queue and
+    const jids = ['one', 'two', 'three', 'four', 'five'];
+    let count = jids.length;
+    const klass = {
+      queue: job => Promise.delay(1)
+        .then(() => job.complete())
+        .then(() => {
+          count -= 1;
+          if (count === 0) {
+            worker.stop();
+          }
+        }),
+    };
+    const disposer = helper.stubDisposer(Job, 'import', sinon.stub());
+    return Promise.using(disposer, (stub) => {
+      stub.returns(klass);
+      const before = Date.now();
+
+      return Promise.map(jids, jid => queue.put({ klass: 'Klass', jid }))
+        .then(() => client.setConfig('queue-max-concurrency', 1))
+        .then(() => worker.run())
+        .then(() => Date.now() - before)
+        .then(diff => expect(diff).to.be.lessThan(interval));
     });
   });
 

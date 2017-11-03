@@ -17,28 +17,13 @@ describe('Popper', () => {
   let popper = null;
 
   beforeEach(() => {
-    popper = new Popper(client, [queueA, queueB], interval);
+    popper = new Popper(client, [queueA, queueB]);
     return cleaner.before();
   });
 
   afterEach(() => cleaner.after());
 
   afterAll(() => client.quit());
-
-  it('can pop a job', () => {
-    const config = { klass: 'Klass', jid: 'jid' };
-    return queueB.put(config)
-      .then(() => popper.pop())
-      .then(job => expect(job.jid).to.eql('jid'));
-  });
-
-  it('gives null if stopped', () => {
-    popper.stop();
-    return popper.pop()
-      .then((job) => {
-        expect(job).to.eql(null);
-      });
-  });
 
   it('can be stopped', () => {
     const delay = 2.5 * interval;
@@ -49,55 +34,78 @@ describe('Popper', () => {
       });
   });
 
-  it('waits until a job is available', () => {
-    const delay = 2.5 * interval;
-    const delayedPut = Promise.delay(delay).then(() => queueB.put({ klass: 'Klass' }));
+  describe('pop', () => {
+    it('can pop a job', () => {
+      const config = { klass: 'Klass', jid: 'jid' };
+      return queueB.put(config)
+        .then(() => popper.pop())
+        .then(job => expect(job.jid).to.eql('jid'));
+    });
 
-    const start = (new Date()).getTime();
-    return Promise.all([delayedPut, popper.pop()])
-      .spread((jid, job) => {
-        expect(job.jid).to.eql(jid);
-        const now = (new Date()).getTime();
-        expect(now - start).to.be.greaterThan(delay);
-      });
+    it('gives null if stopped', () => {
+      popper.stop();
+      return popper.pop()
+        .then(job => expect(job).to.eql(null));
+    });
+
+    it('has no delay if found a job in round robin', () => {
+      const start = (new Date()).getTime();
+      return queueB.put({ klass: 'Klass', jid: 'one' })
+        .then(() => queueB.put({ klass: 'Klass', jid: 'two' }))
+        .then(() => popper.pop())
+        .then(() => popper.pop())
+        .then(() => {
+          const now = (new Date()).getTime();
+          expect(now - start).to.be.lessThan(interval);
+        });
+    });
+
+    // eslint-disable-next-line arrow-body-style
+    it('finds jobs in round-robin order', () => {
+      const promises = [
+        queueA.put({ klass: 'Klass', jid: 'one', priority: -1 }),
+        queueB.put({ klass: 'Klass', jid: 'two', priority: -2 }),
+        queueA.put({ klass: 'Klass', jid: 'three', priority: -3 }),
+        queueB.put({ klass: 'Klass', jid: 'four', priority: -4 }),
+      ];
+      return Promise.all(promises)
+        .then(() => popper.pop())
+        .then((job) => {
+          expect(job.jid).to.eql('one');
+          return popper.pop();
+        })
+        .then((job) => {
+          expect(job.jid).to.eql('two');
+          return popper.pop();
+        })
+        .then((job) => {
+          expect(job.jid).to.eql('three');
+          return popper.pop();
+        })
+        .then((job) => {
+          expect(job.jid).to.eql('four');
+        });
+    });
   });
 
-  it('has no delay if found a job in round robin', () => {
-    const start = (new Date()).getTime();
-    return queueB.put({ klass: 'Klass', jid: 'one' })
-      .then(() => queueB.put({ klass: 'Klass', jid: 'two' }))
-      .then(() => popper.pop())
-      .then(() => popper.pop())
-      .then(() => {
-        const now = (new Date()).getTime();
-        expect(now - start).to.be.lessThan(interval);
-      });
-  });
+  describe('popNext', () => {
+    it('waits until a job is available', () => {
+      const delay = 2.5 * interval;
+      const delayedPut = Promise.delay(delay).then(() => queueB.put({ klass: 'Klass' }));
 
-  // eslint-disable-next-line arrow-body-style
-  it('finds jobs in round-robin order', () => {
-    const promises = [
-      queueA.put({ klass: 'Klass', jid: 'one', priority: -1 }),
-      queueB.put({ klass: 'Klass', jid: 'two', priority: -2 }),
-      queueA.put({ klass: 'Klass', jid: 'three', priority: -3 }),
-      queueB.put({ klass: 'Klass', jid: 'four', priority: -4 }),
-    ];
-    return Promise.all(promises)
-      .then(() => popper.pop())
-      .then((job) => {
-        expect(job.jid).to.eql('one');
-        return popper.pop();
-      })
-      .then((job) => {
-        expect(job.jid).to.eql('two');
-        return popper.pop();
-      })
-      .then((job) => {
-        expect(job.jid).to.eql('three');
-        return popper.pop();
-      })
-      .then((job) => {
-        expect(job.jid).to.eql('four');
-      });
+      const start = (new Date()).getTime();
+      return Promise.all([delayedPut, popper.popNext(interval)])
+        .spread((jid, job) => {
+          expect(job.jid).to.eql(jid);
+          const now = (new Date()).getTime();
+          expect(now - start).to.be.greaterThan(delay);
+        });
+    });
+
+    it('gives null if stopped', () => {
+      popper.stop();
+      return popper.popNext(interval)
+        .then(job => expect(job).to.eql(null));
+    });
   });
 });
