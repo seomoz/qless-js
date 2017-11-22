@@ -337,6 +337,33 @@ describe('Job', () => {
     });
   });
 
+  it('does not blow up if failing the job fails', () => {
+    const jid = 'jid';
+    const klass = {
+      process: () => {
+        throw new Error('Kaboom');
+      },
+    };
+
+    // Set up a stub for import to provide the above class
+    const importDisposer = helper.stubDisposer(Job, 'import', () => klass);
+    return Promise.using(importDisposer, () => {
+      // Run this job that's destined to fail, ensure that `job.process` does not reject
+      return queue.put({ klass: 'my/awesome/klass', jid })
+        .then(() => queue.pop())
+        .then((job) => {
+          // Set up a stub to have job.fail fail
+          const failDisposer = helper.stubDisposer(job, 'fail', () => {
+            return Promise.reject(new Error('Failed to fail'));
+          });
+
+          return Promise.using(failDisposer, () => job.process());
+        })
+        .then(() => client.job(jid))
+        .then(job => expect(job.state).to.eql('running'));
+    });
+  });
+
   it('fails a job if it can find no method', () => {
     const jid = 'jid';
     const klass = {};
