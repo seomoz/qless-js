@@ -1,11 +1,12 @@
 {
   "name": "qless-js",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": false,
   "description": "Qless JavaScript Bindings",
   "main": "index.js",
   "bin": {
-    "qless-js-worker": "bin/qless-js-worker.js"
+    "qless-js-worker": "bin/qless-js-worker.js",
+    "qless-js": "bin/qless-js.js"
   },
   "directories": {
     "test": "test"
