@@ -5,6 +5,7 @@ const Promise = require('bluebird');
 const expect = require('expect.js');
 const Client = require('../lib/client.js');
 const helper = require('./helper.js');
+const QlessError = require('../lib/errors.js').QlessError;
 
 describe('Qless client', () => {
   const url = process.env.REDIS_URL;
@@ -20,6 +21,11 @@ describe('Qless client', () => {
   it('can invoke call', () => {
     return client.call('tag', 'top', 0, 100)
       .then(response => expect(response).to.be('{}'));
+  });
+
+  it('wraps errors in QlessError', () => {
+    return client.call('complete', 'jid')
+      .catch(err => expect(err).to.be.a(QlessError));
   });
 
   it('memoizes SHA', () => {
