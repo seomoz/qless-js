@@ -20,6 +20,7 @@ commander
   .option('-n, --name <name>', 'The name to identify your worker as', os.hostname())
   .option('-d, --workdir <dir>', 'The base work directory path')
   .option('-c, --concurrency <n>', 'The number of concurrent jobs to run [default 10]')
+  .option('-p, --processes <n>', 'The number of processes to spawn [defaults to number of cores]', parseInt)
   .option('-i, --interval <n>', 'Polling interval in seconds [default 60]', parseFloat)
   .option('-q, --queue <name>', 'Add a queue to work on', collect, [])
   .option('-v, --verbose', 'Increase logging level', increaseVerbosity, 0)
@@ -33,22 +34,29 @@ if (options.verbose >= 2) {
   qless.logger.level = 'info';
 }
 
-console.log(options.redis);
+assert(options.queue.length > 0, 'Must provide at least one queue');
 
-const client = new qless.Client({
-  url: options.redis,
-  hostname: options.name,
-});
+options.processes = options.processes || os.cpus().length;
 
-assert(options.queue, 'Must provide at least one queue');
-
-const worker = new qless.workers.Multi(client, {
-  queues: options.queue.map(name => client.queue(name)),
+const config = {
+  clientConfig: {
+    url: options.redis,
+    hostname: options.name,
+  },
+  queueNames: options.queue,
   interval: (options.interval || 60) * 1000,
   count: options.concurrency || 10,
   processConfig: {
     allowPaths: options.allowPaths,
   },
-});
+  processes: options.processes,
+};
+
+const worker = options.processes === 1
+  ? new qless.workers.Multi(config)
+  : new qless.workers.Forking(config);
+
+process.on('SIGQUIT', () => worker.stop());
+process.on('SIGTERM', () => worker.stop(true));
 
 worker.run();
