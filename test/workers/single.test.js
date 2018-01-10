@@ -18,7 +18,8 @@ describe('Single Worker', () => {
   let worker = null;
 
   beforeEach(() => {
-    worker = new Worker(client, {
+    worker = new Worker({
+      client,
       queues: [queue],
       interval,
     });
@@ -30,7 +31,20 @@ describe('Single Worker', () => {
   afterAll(() => client.quit());
 
   it('uses default interval', () => {
-    expect(new Worker(client, {}).interval).to.eql(60000);
+    expect(new Worker({
+      client,
+      queueNames: ['queue'],
+    }).interval).to.eql(60000);
+  });
+
+  it('can accept a client config', () => {
+    worker = new Worker({
+      clientConfig: {
+        url,
+      },
+      queueNames: [],
+    });
+    worker.client.quit();
   });
 
   it('can run jobs', () => {
