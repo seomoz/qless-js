@@ -22,3 +22,26 @@ describe('asArray', () => {
     expect(util.asArray([1, 2, 3])).to.eql([1, 2, 3]);
   });
 });
+
+describe('deepCopy', () => {
+  const obj = {
+    foo: {
+      bar: {
+        whiz: 5,
+      },
+    },
+  };
+
+  it('provides an identical copy', () => {
+    const copy = util.deepCopy(obj);
+
+    expect(copy).to.eql(obj);
+  });
+
+  it('provides a new object', () => {
+    const copy = util.deepCopy(obj);
+
+    delete copy.foo.bar.whiz;
+    expect(copy).not.to.eql(obj);
+  });
+});
