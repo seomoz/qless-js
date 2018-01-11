@@ -19,7 +19,8 @@ describe('Multi Worker', () => {
   let worker = null;
 
   beforeEach(() => {
-    worker = new Worker(client, {
+    worker = new Worker({
+      client,
       queues: [queue],
       interval,
       count: capacity,
@@ -32,8 +33,23 @@ describe('Multi Worker', () => {
   afterAll(() => client.quit());
 
   it('uses default interval', () => {
-    worker = new Worker(client, { count: capacity });
+    worker = new Worker({
+      client,
+      count: capacity,
+      queueNames: ['queue'],
+    });
     expect(worker.interval).to.eql(60000);
+  });
+
+  it('can accept a client config', () => {
+    worker = new Worker({
+      clientConfig: {
+        url,
+      },
+      count: capacity,
+      queueNames: [],
+    });
+    worker.client.quit();
   });
 
   it('can run jobs', () => {

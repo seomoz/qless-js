@@ -1,6 +1,6 @@
 {
   "name": "qless-js",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": false,
   "description": "Qless JavaScript Bindings",
   "main": "index.js",
@@ -44,7 +44,8 @@
     "json-stable-stringify": "^1.0.1",
     "redis": "^2.7.1",
     "uuid": "^3.0.1",
-    "winston": "^2.3.1"
+    "winston": "^2.3.1",
+    "workerpool": "^2.3.0"
   },
   "devDependencies": {
     "babel-core": "^6.20.0",
@@ -64,7 +65,9 @@
       "!index.js",
       "!**/node_modules/**",
       "!coverage/**",
-      "!test/helper.js"
+      "!test/helper.js",
+      "!test/workers/job.js",
+      "!lib/workers/forking-workerpool.js"
     ],
     "coverageThreshold": {
       "global": {
@@ -73,6 +76,7 @@
         "lines": 100,
         "statements": 100
       }
-    }
+    },
+    "testEnvironment": "node"
   }
 }
