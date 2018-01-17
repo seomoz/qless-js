@@ -25,6 +25,9 @@ const stringify = data => dumps(data, {
  * Accumulate flags
  */
 const collect = (val, memo) => {
+  if (memo === undefined) {
+    memo = [];
+  }
   memo.push(val);
   return memo;
 };
@@ -202,14 +205,14 @@ commander
 commander
   .command('put <name>')
   .description('Put a job in the provided queue')
-  .option('-j, --jid', 'Set the job id')
-  .option('-k, --klass', 'Set the job class')
-  .option('-d, --data', 'Set the job data', JSON.parse)
-  .option('-p, --priority', 'Set the job priority', parseInt)
-  .option('-l, --delay', 'Delay the execution of the job by a number of seconds', parseInt)
-  .option('-t, --tag', 'Add a tag to the job', collect, [])
-  .option('-r, --retries', 'The number of retries to use for the job', parseInt)
-  .option('-s, --depends', 'Add a job on which it depends', collect, [])
+  .option('-j, --jid <jid>', 'Set the job id')
+  .option('-k, --klass <klass>', 'Set the job class')
+  .option('-d, --data <data>', 'Set the job data', JSON.parse)
+  .option('-p, --priority <priority>', 'Set the job priority', parseInt)
+  .option('-l, --delay <delay>', 'Delay the execution of the job by a number of seconds', parseInt)
+  .option('-t, --tags <tag>', 'Add a tag to the job', collect)
+  .option('-r, --retries <retries>', 'The number of retries to use for the job', parseInt)
+  .option('-s, --depends <depends>', 'Add a job on which it depends', collect)
   .action(put);
 
 commander
@@ -230,8 +233,8 @@ commander
 commander
   .command('unfail [types...]')
   .description('Retry all the jobs of the provided failure modes')
-  .option('-o, --offset', 'The offset for pagination of failed jobs', parseInt)
-  .option('-c, --count', 'The count for pagination of failed jobs', parseInt)
+  .option('-o, --offset <offset>', 'The offset for pagination of failed jobs', parseInt)
+  .option('-c, --count <count>', 'The count for pagination of failed jobs', parseInt)
   .action(unfail);
 
 commander
@@ -247,8 +250,8 @@ commander
 commander
   .command('completed')
   .description('Show completed jobs')
-  .option('-o, --offset', 'The offset for pagination', parseInt)
-  .option('-c, --count', 'The count for pagination', parseInt)
+  .option('-o, --offset <offset>', 'The offset for pagination', parseInt)
+  .option('-c, --count <count>', 'The count for pagination', parseInt)
   .action(completed);
 
 commander
