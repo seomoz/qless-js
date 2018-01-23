@@ -50,6 +50,7 @@ const config = {
     allowPaths: options.allowPaths,
   },
   processes: options.processes,
+  logLevel: qless.logger.level,
 };
 
 const worker = options.processes === 1
