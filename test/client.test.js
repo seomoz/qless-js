@@ -1,5 +1,7 @@
 'use strict';
 
+const path = require('path');
+
 const Promise = require('bluebird');
 
 const expect = require('expect.js');
@@ -110,5 +112,20 @@ describe('Qless client', () => {
 
   it('gets nothing for nonexistent jobs', () => {
     return client.job('jid').then(job => expect(job).to.be(null));
+  });
+
+  describe('with bad path', () => {
+    const badClient = new Client(url);
+
+    beforeEach(() => {
+      badClient.path = path.resolve(__dirname, 'some/path/that/does/not/exist');
+    });
+
+    afterAll(() => badClient.quit());
+
+    it('throws a QlessError on load', () => {
+      return badClient.load()
+        .catch(err => expect(err).to.be.a(QlessError));
+    });
   });
 });
