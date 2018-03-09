@@ -1,5 +1,7 @@
 'use strict';
 
+const Promise = require('bluebird').Promise;
+
 const expect = require('expect.js');
 const Client = require('../lib/client.js');
 const helper = require('./helper.js');
@@ -64,6 +66,27 @@ describe('Jobs', () => {
     it('provides failed jobs', () => {
       return client.jobs.failed(group)
         .then(response => expect(response).to.eql({ jobs: [jid], total: 1 }));
+    });
+  });
+
+  describe('tagged', () => {
+    const tag = 'tag';
+    const jids = ['one', 'two', 'three'];
+
+    beforeEach(() => {
+      return Promise.all(jids.map(id => queue.put({ klass: 'klass', jid: id, tags: [tag] })));
+    });
+
+    it('gives us the count of jobs', () => {
+      return client.jobs.tagged(tag)
+        .get('total')
+        .then(total => expect(total).to.eql(3));
+    });
+
+    it('gives us access to all the jobs', () => {
+      return client.jobs.tagged(tag)
+        .get('jobs')
+        .then(jobs => expect(new Set(jobs)).to.eql(new Set(jids)));
     });
   });
 });
