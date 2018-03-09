@@ -89,4 +89,23 @@ describe('Jobs', () => {
         .then(jobs => expect(new Set(jobs)).to.eql(new Set(jids)));
     });
   });
+
+  describe('get', () => {
+    const jids = ['one', 'two', 'three'];
+
+    beforeEach(() => {
+      return Promise.all(jids.map(id => queue.put({ klass: 'klass', jid: id })));
+    });
+
+    it('can fetch multiple jobs at once', () => {
+      return client.jobs.get(...jids)
+        .map(job => job.id)
+        .then(jobs => expect(new Set(jobs)).to.eql(new Set(jids)));
+    });
+
+    it('returns no jobs if no jids provided', () => {
+      return client.jobs.get()
+        .then(found => expect(found).to.eql([]));
+    });
+  });
 });
