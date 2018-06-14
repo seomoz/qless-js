@@ -427,4 +427,18 @@ describe('Job', () => {
         .then(job => job.heartbeatUntilPromise(job.complete()));
     });
   });
+
+  describe('spawnedFromJid', () => {
+    it('is null if not spawned from recurring', () => {
+      return queue.put({ klass: 'Klass' })
+        .then(() => queue.pop())
+        .then(job => expect(job.spawnedFromJid).to.eql(null));
+    });
+
+    it('is the recurring job ID if spawned from recurring', () => {
+      return queue.recur({ jid: 'jid', klass: 'Klass', interval: 10 })
+        .then(() => queue.pop())
+        .then(job => expect(job.spawnedFromJid).to.eql('jid'));
+    });
+  });
 });
