@@ -41,7 +41,7 @@ describe('Forking Worker', () => {
   afterAll(() => client.quit());
 
   it('can run jobs', () => {
-    const klass = Path.resolve(__dirname, 'job/BasicJob');
+    const klass = Path.resolve(__dirname, '../jobs/workers/BasicJob');
     const jid = 'jid';
 
     return queue.put({ klass, jid })

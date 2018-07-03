@@ -141,6 +141,24 @@ enqueued. It's much better to require the module to have been installed (rather
 than just an arbitrary file on a worker's filesystem) in the environment of the
 worker.
 
+## Forking
+
+Since some jobs are CPU-intensive, `qless` provides a `fork` method on the job
+object. It accepts a function that should be run for the job, and returns a
+promise. It runs that function in its own subprocess, and heartbeats that job
+from the parent process until the job completes:
+
+```javascript
+class Job {
+  static queue(job) {
+    return job.fork(() => {
+      // Something really CPU intensive
+      return job.complete();
+    });
+  }
+}
+```
+
 ## Running Jobs
 
 There are number of additional bells and whistles when running jobs with
