@@ -441,4 +441,69 @@ describe('Job', () => {
         .then(job => expect(job.spawnedFromJid).to.eql('jid'));
     });
   });
+
+  describe('forkDisabled', () => {
+    it('is enabled by default', () => {
+      return queue.put({ klass: 'Klass' })
+        .then(() => queue.pop())
+        .then(job => expect(job.forkEnabled()).to.eql(true));
+    });
+
+    it('can be disabled', () => {
+      return queue.put({ klass: 'Klass' })
+        .then(() => queue.pop())
+        .then((job) => {
+          job.disableFork();
+          return expect(job.forkEnabled()).to.eql(false);
+        });
+    });
+
+    it('can be reenabled', () => {
+      return queue.put({ klass: 'Klass' })
+        .then(() => queue.pop())
+        .then((job) => {
+          job.disableFork();
+          job.enableFork();
+          return expect(job.forkEnabled()).to.eql(true);
+        });
+    });
+  });
+
+  describe('fork', () => {
+    it('completes the job', () => {
+      const jid = 'jid';
+      return queue.put({ klass: '../test/jobs/fork.js', jid })
+        .then(() => queue.pop())
+        .then(job => job.process({
+          allowPaths: true,
+        }))
+        .then(() => client.job(jid))
+        .then(job => expect(job.state).to.eql('complete'));
+    });
+
+    it('runs the job when fork is disabled', () => {
+      const jid = 'jid';
+      return queue.put({ klass: '../test/jobs/fork.js', jid })
+        .then(() => queue.pop())
+        .then((job) => {
+          job.disableFork();
+          return job.process({
+            allowPaths: true,
+          });
+        })
+        .then(() => client.job(jid))
+        .then(job => expect(job.state).to.eql('complete'));
+    });
+
+    it('catches errors from pool', () => {
+      const jid = 'jid';
+      return client.queue('abort').put({ klass: '../test/jobs/fork.js', jid })
+        .then(() => client.queue('abort').pop())
+        .then(job => job.process({
+          allowPaths: true,
+        }))
+        .then(() => client.job(jid))
+        .then(job => expect(job.state).to.eql('failed'));
+    });
+  });
 });
