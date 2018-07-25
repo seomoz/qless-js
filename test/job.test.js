@@ -507,3 +507,126 @@ describe('Job', () => {
     });
   });
 });
+
+describe('RecurringJob', () => {
+  const url = process.env.REDIS_URL;
+  const client = new Client(url);
+  const cleaner = new helper.Cleaner(client);
+  const queue = client.queue('queue');
+  const jid = 'jid';
+  const options = {
+    jid,
+    klass: 'Klass',
+    tags: ['tag'],
+    retries: 3,
+    priority: 10,
+    interval: 45,
+    data: {
+      key: 'value',
+    },
+  };
+  const attributes = [
+    'jid', 'data', 'tags', 'retries', 'priority', 'interval', 'data',
+  ];
+
+  beforeEach(() => cleaner.before());
+
+  afterEach(() => cleaner.after());
+
+  afterAll(() => client.quit());
+
+  beforeEach(() => queue.recur(options));
+
+  attributes.forEach((attr) => {
+    it(`provides access to ${attr}`, () => {
+      return client.job(jid).then((job) => expect(job[attr]).to.eql(options[attr]));
+    });
+  });
+
+  it('provides access to klassName', () => {
+    return client.job(jid).then((job) => expect(job.klassName).to.eql(options.klass));
+  });
+
+  it('provides access to count', () => {
+    return client.job(jid).then((job) => expect(job.count).to.eql(0));
+  });
+
+  it('provides access to queueName', () => {
+    return client.job(jid).then((job) => expect(job.queueName).to.eql(queue.name));
+  });
+
+  it('exposes the next time a job will run', () => {
+    return client.job(jid)
+      .then((job) => job.next())
+      .then((next) => {
+        const now = (new Date()).getTime() / 1000.0;
+        const diff = Math.abs(now - next);
+
+        return expect(diff).to.be.below(1);
+      });
+  });
+
+  ['priority', 'retries', 'interval'].forEach((attr) => {
+    it(`can set ${attr}`, () => {
+      const value = 107;
+
+      return client.job(jid)
+        .then((job) => job.update({ [attr]: value }).then(() => expect(job[attr]).to.eql(value)))
+        .then(() => client.job(jid))
+        .then((job) => expect(job[attr]).to.eql(value));
+    });
+  });
+
+  it('can set data', () => {
+    const data = {
+      key: 'new value',
+    };
+
+    return client.job(jid)
+      .then((job) => job.update({ data }).then(() => expect(job.data).to.eql(data)))
+      .then(() => client.job(jid))
+      .then((job) => expect(job.data).to.eql(data));
+  });
+
+  it('can set klass', () => {
+    const klass = 'new/class';
+
+    return client.job(jid)
+      .then((job) => job.update({ klass }).then(() => expect(job.klassName).to.eql(klass)))
+      .then(() => client.job(jid))
+      .then((job) => expect(job.klassName).to.eql(klass));
+  });
+
+  it('can move to another queue', () => {
+    const newQueue = 'another-queue';
+
+    return client.job(jid)
+      .then((job) => job.move(newQueue))
+      .then(() => client.job(jid))
+      .then((job) => expect(job.queueName).to.eql(newQueue));
+  });
+
+  it('can be canceled', () => {
+    return client.job(jid)
+      .then((job) => job.cancel())
+      .then(() => client.job(jid))
+      .then((job) => expect(job).to.be(null));
+  });
+
+  it('can add and remove tags', () => {
+    const tag = 'new-tag';
+
+    return client.job(jid)
+      .then((job) => {
+        expect(job.tags).to.not.contain(tag);
+        return job.tag(tag);
+      })
+      .then(() => client.job(jid))
+      .then((job) => {
+        expect(job.tags).to.contain(tag);
+        return job.untag(tag);
+      })
+      .then(() => client.job(jid))
+      .then((job) => expect(job.tags).to.not.contain(tag));
+  });
+});
