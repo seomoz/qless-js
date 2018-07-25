@@ -1,0 +1,6 @@
+{
+  "rules": {
+    "arrow-parens": ["off"], // it() without braces looks odd
+    "arrow-body-style": ["off"], // especially in tests, multiline single-return arrow functions are common
+  }
+}
