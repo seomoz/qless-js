@@ -5,7 +5,7 @@ const Path = require('path');
 const Promise = require('bluebird').Promise;
 const sinon = require('sinon');
 
-const Job = require('../lib/job.js');
+const { Job } = require('../lib/job.js');
 const helper = require('./helper.js');
 const Client = require('../lib/client.js');
 
@@ -90,7 +90,7 @@ describe('Job', () => {
   });
 
   it('allows the import of a . path to a klass if configured to', () => {
-    const path = Path.resolve(__dirname, '../lib/job.js');
+    const path = Path.resolve(__dirname, '../lib/job.js/Job');
     return queue.put({ klass: path })
       .then(() => queue.pop())
       .then(job => expect(job.getKlass({ allowPaths: true })).to.eql(Job));

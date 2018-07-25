@@ -5,7 +5,7 @@ const expect = require('expect.js');
 const sinon = require('sinon');
 
 const helper = require('../helper.js');
-const Job = require('../../lib/job.js');
+const { Job } = require('../../lib/job.js');
 const Client = require('../../lib/client.js');
 const Worker = require('../../lib/workers/single.js');
 
