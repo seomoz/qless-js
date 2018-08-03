@@ -169,6 +169,28 @@ describe('Job', () => {
       });
   });
 
+  it('can get when() for a scheduled job', () => {
+    const jid = 'jid';
+    const delay = 10;
+    return queue.put({ klass: 'Klass', jid, delay })
+      .then(() => client.job(jid))
+      .then(job => job.when())
+      .then((when) => {
+        const now = (new Date()).getTime() / 1000.0;
+        const diff = Math.abs(when - delay - now);
+
+        expect(diff).to.be.below(1);
+      });
+  });
+
+  it('cannot get when() for a non-scheduled job', () => {
+    const jid = 'jid';
+    return queue.put({ klass: 'Klass', jid })
+      .then(() => client.job(jid))
+      .then(job => job.when())
+      .then((when) => expect(when).to.eql(null));
+  });
+
   it('can complete', () => {
     return queue.put({ klass: 'Klass' })
       .then(() => queue.pop())
