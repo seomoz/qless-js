@@ -184,6 +184,11 @@ order). Only when there are no jobs available does the worker sleep for the
 provided interval before checking again. Otherwise, immediately after completing
 a job, it checks for another.
 
+### Number of processes (`--processes`)
+
+This configures the number of processes that qless will spawn.  It
+defaults to the number of cores on the machine.
+
 ### Multiple queues (`--queue`)
 
 A worker can grab jobs from multiple queues, as they're available. They're
