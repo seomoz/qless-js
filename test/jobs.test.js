@@ -88,6 +88,12 @@ describe('Jobs', () => {
         .get('jobs')
         .then(jobs => expect(new Set(jobs)).to.eql(new Set(jids)));
     });
+
+    it('provides jobs as an array when empty', () => {
+      return client.jobs.tagged('other-tag')
+        .get('jobs')
+        .then(jobs => expect(jobs).to.be.an('array'));
+    });
   });
 
   describe('get', () => {
