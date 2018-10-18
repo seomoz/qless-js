@@ -42,6 +42,52 @@ describe('Job', () => {
       });
   });
 
+  describe('dependents', () => {
+    const dependee = 'first';
+    const dependent = 'second';
+
+    beforeEach(() => {
+      const config = {
+        klass: 'Klass',
+        data: {},
+      };
+      return queue.put(Object.assign({ jid: dependee }, config))
+        .then(() => queue.put(Object.assign({ jid: dependent, depends: [dependee] }, config)));
+    });
+
+    it('can access dependents as an array when it has them', () => {
+      return client.job(dependee)
+        .then((job) => {
+          expect(job.dependents).to.be.an(Array);
+          expect(job.dependents).to.eql([dependent]);
+        });
+    });
+
+    it('can access dependents as an array when it has none', () => {
+      return client.job(dependent)
+        .then((job) => {
+          expect(job.dependents).to.be.an(Array);
+          expect(job.dependents).to.eql([]);
+        });
+    });
+
+    it('can access dependencies as an array when it has them', () => {
+      return client.job(dependent)
+        .then((job) => {
+          expect(job.dependencies).to.be.an(Array);
+          expect(job.dependencies).to.eql([dependee]);
+        });
+    });
+
+    it('can access dependencies as an array when it has none', () => {
+      return client.job(dependee)
+        .then((job) => {
+          expect(job.dependencies).to.be.an(Array);
+          expect(job.dependencies).to.eql([]);
+        });
+    });
+  });
+
   it('can import a file', () => {
     const path = Path.resolve(__dirname, '../lib/client.js');
     expect(Job.import(path)).to.eql(Client);
