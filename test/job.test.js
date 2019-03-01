@@ -298,6 +298,33 @@ describe('Job', () => {
       });
   });
 
+  it('can log for a job with extra data', () => {
+    const jid = 'jid';
+    return queue.put({ klass: 'Klass', jid })
+      .then(() => client.job(jid))
+      .then(job => job.log('message', { attribute: 'value' }))
+      .then(() => client.job(jid))
+      .then((job) => {
+        const entry = job.history[job.history.length - 1];
+
+        expect(entry.what).to.eql('message');
+        expect(entry.attribute).to.eql('value');
+      });
+  });
+
+  it('can log for a job without extra data', () => {
+    const jid = 'jid';
+    return queue.put({ klass: 'Klass', jid })
+      .then(() => client.job(jid))
+      .then(job => job.log('message'))
+      .then(() => client.job(jid))
+      .then((job) => {
+        const entry = job.history[job.history.length - 1];
+
+        expect(entry.what).to.eql('message');
+      });
+  });
+
   it('can track and untrack a job', () => {
     const jid = 'jid';
     return queue.put({ klass: 'Klass', jid })
