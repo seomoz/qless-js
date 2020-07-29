@@ -60,6 +60,18 @@ const put = (name, options) => {
   logWithClient(options.parent, client => client.queue(name).put(options));
 };
 
+/*
+ * Recur a job
+ */
+const recur = (name, options) => {
+  logWithClient((client) => {
+    return client.queue(name).recur({
+      offset: 0,
+      ...options,
+    });
+  });
+};
+
 /**
  * Pause the provided queues
  */
@@ -122,6 +134,13 @@ const job = (jid, options) => {
  */
 const cancel = (jids, options) => {
   logWithClient(options.parent, client => client.cancel.apply(client, jids));
+};
+
+/**
+ * Unrecur one recurring jobs
+ */
+const unrecur = (jid) => {
+  logWithClient((client) => client.call('unrecur', jid));
 };
 
 /**
@@ -210,10 +229,23 @@ commander
   .option('-d, --data <data>', 'Set the job data', JSON.parse)
   .option('-p, --priority <priority>', 'Set the job priority', parseInt)
   .option('-l, --delay <delay>', 'Delay the execution of the job by a number of seconds', parseInt)
-  .option('-t, --tags <tag>', 'Add a tag to the job', collect)
+  .option('-t, --tags <tag>', 'Add a tag to the job', collect, [])
   .option('-r, --retries <retries>', 'The number of retries to use for the job', parseInt)
-  .option('-s, --depends <depends>', 'Add a job on which it depends', collect)
+  .option('-s, --depends <depends>', 'Add a job on which it depends', collect, [])
   .action(put);
+
+commander
+  .command('recur <name>')
+  .description('Recur a job in the provided queue')
+  .option('-j, --jid <string>', 'Set the job id')
+  .option('-k, --klass <string>', 'Set the job class')
+  .option('-d, --data <string>', 'Set the job data', JSON.parse)
+  .option('-p, --priority <int>', 'Set the job priority', parseInt)
+  .option('-i, --interval <int>', 'Recurring jobs execution in seconds', parseInt)
+  .option('-t, --tags <string>', 'Add a tag to the job', collect, [])
+  .option('-r, --retries <int>', 'The number of retries to use for the job', parseInt)
+  .option('-s, --depends <string>', 'Add a job on which it depends', collect, [])
+  .action(recur);
 
 commander
   .command('pause [names...]')
@@ -246,6 +278,11 @@ commander
   .command('cancel [jids...]')
   .description('Cancel all the provided jobs')
   .action(cancel);
+
+commander
+  .command('unrecur <jid>')
+  .description('Unrecur the provided job')
+  .action(unrecur);
 
 commander
   .command('completed')
