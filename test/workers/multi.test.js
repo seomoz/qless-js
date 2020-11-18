@@ -1,5 +1,9 @@
 'use strict';
 
+const fs = require('fs');
+const os = require('os');
+const Path = require('path');
+
 const Promise = require('bluebird').Promise;
 const expect = require('expect.js');
 const sinon = require('sinon');
@@ -24,7 +28,9 @@ describe('Multi Worker', () => {
       queues: [queue],
       interval,
       count: capacity,
+      workdir: Path.join(os.tmpdir(), 'qless'),
     });
+
     return cleaner.before();
   });
 
@@ -63,6 +69,28 @@ describe('Multi Worker', () => {
         .then(() => worker.run())
         .then(() => client.job('jid'))
         .then(job => expect(job.state).to.eql('complete'));
+    });
+  });
+
+  it('creates and cleans up the job workdir', () => {
+    const klass = {
+      queue: job => {
+        if (fs.existsSync(job.workdir)) {
+          return job.complete().then(() => worker.stop());
+        } else {
+          return job.fail('queue-Error', 'directory did not exist').then(() => worker.stop());
+        }
+      },
+    };
+    const disposer = helper.stubDisposer(Job, 'import', sinon.stub());
+    return Promise.using(disposer, (stub) => {
+      stub.returns(klass);
+      return queue.put({ klass: 'Klass', jid: 'jid' })
+        .then(() => worker.run())
+        .then(() => client.job('jid'))
+        .then(job => expect(job.state).to.eql('complete'));
+    }).then(() => {
+      return expect(fs.existsSync(Path.join(worker.workdir, 'jid'))).to.be(false);
     });
   });
 

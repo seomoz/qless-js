@@ -1,7 +1,9 @@
 #! /usr/bin/env node
 
-const assert = require('assert');
 const os = require('os');
+const Path = require('path');
+
+const assert = require('assert');
 const qless = require('../index.js');
 
 const commander = require('commander');
@@ -49,6 +51,7 @@ const config = {
   processConfig: {
     allowPaths: options.allowPaths,
   },
+  workdir: options.workdir || Path.join(os.tmpdir(), 'qless'),
   processes: options.processes,
   logLevel: qless.logger.level,
 };

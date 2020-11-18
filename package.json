@@ -1,6 +1,6 @@
 {
   "name": "qless-js",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "private": false,
   "description": "Qless JavaScript Bindings",
   "main": "index.js",
@@ -42,7 +42,9 @@
     "double-ended-queue": "^2.1.0-0",
     "es6-error": "^4.0.2",
     "json-stable-stringify": "^1.0.1",
+    "mkdirp": "^1.0.4",
     "redis": "^2.7.1",
+    "rimraf": "^3.0.2",
     "uuid": "^3.0.1",
     "winston": "^2.3.1",
     "workerpool": "^2.3.0"
