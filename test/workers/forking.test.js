@@ -1,5 +1,6 @@
 'use strict';
 
+const os = require('os');
 const Path = require('path');
 
 const Promise = require('bluebird').Promise;
@@ -30,6 +31,7 @@ describe('Forking Worker', () => {
       interval,
       count: capacity,
       processes: 2,
+      workdir: Path.join(os.tmpdir(), 'qless'),
     });
     return cleaner.before();
   });
