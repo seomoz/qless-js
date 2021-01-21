@@ -9,9 +9,10 @@
     "prefer-rest-params": [0], // for compatability with <6
     "arrow-body-style": ["warn", "as-needed"], // especially in tests, multiline single-return arrow functions are common
     "quote-props": ["error", "consistent-as-needed"],
+    "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"]
   },
   "parserOptions": {
-    "ecmaVersion": 6
+    "ecmaVersion": 2018
   },
   "env": {
     "node": true,

@@ -32,6 +32,10 @@ describe('Forking Worker', () => {
       count: capacity,
       processes: 2,
       workdir: Path.join(os.tmpdir(), 'qless'),
+      memory: {
+        max: Infinity,
+        interval: 1000,
+      },
     });
     return cleaner.before();
   });
@@ -69,6 +73,45 @@ describe('Forking Worker', () => {
       worker.run(),
       Promise.delay(50).then(() => worker.stop(true)),
     ]);
+  });
+
+  it('can quit workers that consume too much memory', async () => {
+    worker.memory.max = 0;
+    const promise = worker.run();
+
+    while (worker.pool.workers.length < worker.config.processes) {
+      // eslint-disable-next-line no-await-in-loop
+      await Promise.delay(50);
+    }
+    const mocks = worker.pool.workers.map((child) => jest.spyOn(child.worker, 'kill'));
+
+    await Promise.delay(worker.memory.interval * 2);
+    for (const mock of mocks) {
+      expect(mock.mock.calls.length).to.be.greaterThan(0);
+    }
+
+    worker.stop(true);
+
+    return promise;
+  });
+
+  it('does not quit workers that consume acceptable memory', async () => {
+    const promise = worker.run();
+
+    while (worker.pool.workers.length < worker.config.processes) {
+      // eslint-disable-next-line no-await-in-loop
+      await Promise.delay(50);
+    }
+    const mocks = worker.pool.workers.map((child) => jest.spyOn(child.worker, 'kill'));
+
+    await Promise.delay(worker.memory.interval * 2);
+    for (const mock of mocks) {
+      expect(mock.mock.calls.length).to.be.equal(0);
+    }
+
+    worker.stop(true);
+
+    await promise;
   });
 
   it('respawns workers that die', () => {
