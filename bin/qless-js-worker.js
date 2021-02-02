@@ -44,7 +44,8 @@ commander
   .option('-q, --queue <name>', 'Add a queue to work on', collect, [])
   .option('-v, --verbose', 'Increase logging level', increaseVerbosity, 0)
   .option('-a, --allow-paths', 'Allow paths for job class names')
-  .option('-m, --max-memory <max>', 'Maximum memory each process can consume', 'Infinity');
+  .option('-m, --max-memory <max>', 'Maximum memory each process can consume', 'Infinity')
+  .option('-t, --set-tmpdir', 'Set tmpdir to be qless worker process workdir');
 
 const options = commander.parse(process.argv);
 
@@ -86,6 +87,7 @@ const config = {
     interval: 60000,
     max: getMaxMemory(),
   },
+  setTmpdir: options.setTmpdir,
 };
 
 const worker = options.processes === 1
