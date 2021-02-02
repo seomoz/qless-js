@@ -20,6 +20,7 @@ describe('Multi Worker', () => {
   const client = new Client(url);
   const cleaner = new helper.Cleaner(client);
   const queue = client.queue('queue');
+  const tmpdir = process.env.TMPDIR;
   let worker = null;
 
   beforeEach(() => {
@@ -32,6 +33,10 @@ describe('Multi Worker', () => {
     });
 
     return cleaner.before();
+  });
+
+  afterEach(() => {
+    process.env.TMPDIR = tmpdir;
   });
 
   afterEach(() => cleaner.after());
@@ -69,6 +74,21 @@ describe('Multi Worker', () => {
         .then(() => worker.run())
         .then(() => client.job('jid'))
         .then(job => expect(job.state).to.eql('complete'));
+    });
+  });
+
+  it('can set tmpdir', () => {
+    worker.setTmpdir = true;
+
+    const klass = {
+      queue: job => job.complete().then(() => worker.stop()),
+    };
+    const disposer = helper.stubDisposer(Job, 'import', sinon.stub());
+    return Promise.using(disposer, (stub) => {
+      stub.returns(klass);
+      return queue.put({ klass: 'Klass', jid: 'jid' })
+        .then(() => worker.run())
+        .then(() => expect(process.env.TMPDIR).to.eql(worker.workdir));
     });
   });
 
