@@ -231,6 +231,26 @@ const cancelFailed = (types, options) => {
   });
 };
 
+/**
+ * Cancel all the jobs in the provided queue
+ */
+const cancelQueue = (queues, options) => {
+  return logWithClient(options.parent, async (client) => {
+    for (const name of queues) {
+      // eslint-disable-next-line no-await-in-loop
+      let jobs = await client.queue(name).peek(1000);
+      while (jobs.length > 0) {
+        console.log(`Canceling ${jobs.length} jobs`);
+        const jids = jobs.map(j => j.jid);
+        // eslint-disable-next-line no-await-in-loop
+        await client.cancel(...jids);
+        // eslint-disable-next-line no-await-in-loop
+        jobs = await client.queue(name).peek(1000);
+      }
+    }
+  });
+};
+
 commander
   .option('-r, --redis <url>', 'The redis:// url to connect to')
   .option('-v, --verbose', 'Increase logging level', logger.increaseVerbosity);
@@ -339,5 +359,10 @@ commander
   .command('cancel-failed [types...]')
   .description('Cancel all jobs of the provided failure types')
   .action(cancelFailed);
+
+commander
+  .command('cancel-queue [queues...]')
+  .description('Cancel all jobs in the provided queue')
+  .action(cancelQueue);
 
 commander.parse(process.argv);
