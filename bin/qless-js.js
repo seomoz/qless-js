@@ -212,6 +212,25 @@ const config = (path, options) => {
   });
 };
 
+/**
+ * Cancel all the jobs with the provided failures
+ */
+const cancelFailed = (types, options) => {
+  return logWithClient(options.parent, async (client) => {
+    for (const type of types) {
+      // eslint-disable-next-line no-await-in-loop
+      let jids = (await client.jobs.failed(type, 0, 1000)).jobs;
+      while (jids.length > 0) {
+        console.log(`Canceling ${jids.length} jobs`);
+        // eslint-disable-next-line no-await-in-loop
+        await client.cancel(...jids);
+        // eslint-disable-next-line no-await-in-loop
+        jids = (await client.jobs.failed(type, 0, 1000)).jobs;
+      }
+    }
+  });
+};
+
 commander
   .option('-r, --redis <url>', 'The redis:// url to connect to')
   .option('-v, --verbose', 'Increase logging level', logger.increaseVerbosity);
@@ -315,5 +334,10 @@ commander
   .command('config [path]')
   .description('Display the config, or set the config from the provided path')
   .action(config);
+
+commander
+  .command('cancel-failed [types...]')
+  .description('Cancel all jobs of the provided failure types')
+  .action(cancelFailed);
 
 commander.parse(process.argv);
