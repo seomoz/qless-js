@@ -251,6 +251,27 @@ const cancelQueue = (queues, options) => {
   });
 };
 
+/**
+ * Process a specific job (though calls to `complete` and `fail` will be mocked
+ * out). This is useful for debugging to see what a specific job's execution
+ * would be like.
+ */
+const run = (jid, options) => {
+  const util = require('util');
+  return logWithClient(options.parent, async (client) => {
+    const found = await client.job(jid);
+    found.heartbeatUntilPromise = (promise) => promise;
+    found.complete = (...arguments) => {
+      console.log(`Called complete(${arguments.map(util.inspect).join(', ')})`);
+    };
+    found.fail = (...arguments) => {
+      console.log(`Called fail(${arguments.map(util.inspect).join(', ')})`);
+    };
+
+    return found.process();
+  });
+};
+
 commander
   .option('-r, --redis <url>', 'The redis:// url to connect to')
   .option('-v, --verbose', 'Increase logging level', logger.increaseVerbosity);
@@ -364,5 +385,10 @@ commander
   .command('cancel-queue [queues...]')
   .description('Cancel all jobs in the provided queue')
   .action(cancelQueue);
+
+commander
+  .command('run <jid>')
+  .description('Run the provided job (useful for debugging)')
+  .action(run);
 
 commander.parse(process.argv);
