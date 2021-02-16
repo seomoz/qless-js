@@ -95,6 +95,37 @@ describe('Forking Worker', () => {
     return promise;
   });
 
+  it('runs workers with passed memory limit', async () => {
+    worker.memory.max = 209715200;
+    const promise = worker.run();
+
+    const options = worker.getForkOptions();
+    expect(options).to.be.equal({
+      minWorkers: promise.processes,
+      maxWorkers: promise.processes,
+      execArgv: ['--max-old-space-size=100'],
+    });
+
+    worker.stop(true);
+
+    return promise;
+  });
+
+  it('runs workers without passed memory limit if limit set to infinity(not passed)', async () => {
+    worker.memory.max = Infinity;
+    const promise = worker.run();
+
+    const options = worker.getForkOptions();
+    expect(options).to.be.equal({
+      minWorkers: promise.processes,
+      maxWorkers: promise.processes,
+    });
+
+    worker.stop(true);
+
+    return promise;
+  });
+
   it('does not quit workers that consume acceptable memory', async () => {
     const promise = worker.run();
 
