@@ -114,6 +114,36 @@ describe('Multi Worker', () => {
     });
   });
 
+  it('only cleans the jobs working directory', async () => {
+    // In this scenario, two jobs need to run, then one job needs to finish
+    // before the other.
+    let count = 2;
+    const results = [];
+    const klass = {
+      queue: async (job) => {
+        await Promise.delay(interval * 5);
+        results.push(fs.existsSync(job.workdir));
+        await job.complete();
+        count -= 1;
+        if (count === 0) {
+          return worker.stop();
+        }
+        return count;
+      },
+    };
+    const disposer = helper.stubDisposer(Job, 'import', sinon.stub());
+    await Promise.using(disposer, (stub) => {
+      stub.returns(klass);
+      const promise = worker.run();
+      return queue.put({ klass: 'Klass', jid: 'jid' })
+        .then(() => Promise.delay(interval * 2))
+        .then(() => queue.put({ klass: 'Klass', jid: 'jid-2' }))
+        .then(() => promise);
+    });
+
+    return expect(results).to.eql([true, true]);
+  });
+
   it('remains saturated with max-concurrency', () => {
     // This test will put several jobs in the queue and
     const jids = ['one', 'two', 'three', 'four', 'five'];
