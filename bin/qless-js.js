@@ -139,8 +139,8 @@ const cancel = (jids, options) => {
 /**
  * Unrecur one recurring jobs
  */
-const unrecur = (jid) => {
-  logWithClient(client => client.call('unrecur', jid));
+const unrecur = (jid, options) => {
+  logWithClient(options.parent, client => client.call('unrecur', jid));
 };
 
 /**
