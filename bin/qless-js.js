@@ -139,8 +139,8 @@ const cancel = (jids, options) => {
 /**
  * Unrecur one recurring jobs
  */
-const unrecur = (jid) => {
-  logWithClient(client => client.call('unrecur', jid));
+const unrecur = (jid, options) => {
+  logWithClient(options.parent, client => client.call('unrecur', jid));
 };
 
 /**
@@ -209,6 +209,66 @@ const config = (path, options) => {
         .then(() => client.getConfig());
     }
     return client.getConfig();
+  });
+};
+
+/**
+ * Cancel all the jobs with the provided failures
+ */
+const cancelFailed = (types, options) => {
+  return logWithClient(options.parent, async (client) => {
+    for (const type of types) {
+      // eslint-disable-next-line no-await-in-loop
+      let jids = (await client.jobs.failed(type, 0, 1000)).jobs;
+      while (jids.length > 0) {
+        console.log(`Canceling ${jids.length} jobs`);
+        // eslint-disable-next-line no-await-in-loop
+        await client.cancel(...jids);
+        // eslint-disable-next-line no-await-in-loop
+        jids = (await client.jobs.failed(type, 0, 1000)).jobs;
+      }
+    }
+  });
+};
+
+/**
+ * Cancel all the jobs in the provided queue
+ */
+const cancelQueue = (queues, options) => {
+  return logWithClient(options.parent, async (client) => {
+    for (const name of queues) {
+      // eslint-disable-next-line no-await-in-loop
+      let jobs = await client.queue(name).peek(1000);
+      while (jobs.length > 0) {
+        console.log(`Canceling ${jobs.length} jobs`);
+        const jids = jobs.map(j => j.jid);
+        // eslint-disable-next-line no-await-in-loop
+        await client.cancel(...jids);
+        // eslint-disable-next-line no-await-in-loop
+        jobs = await client.queue(name).peek(1000);
+      }
+    }
+  });
+};
+
+/**
+ * Process a specific job (though calls to `complete` and `fail` will be mocked
+ * out). This is useful for debugging to see what a specific job's execution
+ * would be like.
+ */
+const run = (jid, options) => {
+  const util = require('util');
+  return logWithClient(options.parent, async (client) => {
+    const found = await client.job(jid);
+    found.heartbeatUntilPromise = (promise) => promise;
+    found.complete = (...arguments) => {
+      console.log(`Called complete(${arguments.map(util.inspect).join(', ')})`);
+    };
+    found.fail = (...arguments) => {
+      console.log(`Called fail(${arguments.map(util.inspect).join(', ')})`);
+    };
+
+    return found.process();
   });
 };
 
@@ -315,5 +375,20 @@ commander
   .command('config [path]')
   .description('Display the config, or set the config from the provided path')
   .action(config);
+
+commander
+  .command('cancel-failed [types...]')
+  .description('Cancel all jobs of the provided failure types')
+  .action(cancelFailed);
+
+commander
+  .command('cancel-queue [queues...]')
+  .description('Cancel all jobs in the provided queue')
+  .action(cancelQueue);
+
+commander
+  .command('run <jid>')
+  .description('Run the provided job (useful for debugging)')
+  .action(run);
 
 commander.parse(process.argv);
