@@ -7,6 +7,8 @@ const Promise = require('bluebird').Promise;
 const expect = require('expect.js');
 
 const helper = require('../helper.js');
+const { Job } = require('../../lib/job.js');
+const sinon = require('sinon');
 const Client = require('../../lib/client.js');
 const Worker = require('../../lib/workers/forking.js');
 
@@ -74,6 +76,34 @@ describe('Forking Worker', () => {
       Promise.delay(50).then(() => worker.stop(true)),
     ]);
   });
+
+  it('kills worker which runs longer than timeout', async () => {
+    worker.timeout = 5000;
+    const klass = {
+      queue: async job => {
+        // analogue of endless job, so only 1 way to finish it - by timeout
+        await Promise.delay(10000000);
+        return job.complete();
+      },
+    };
+    const disposer = helper.stubDisposer(Job, 'import', sinon.stub());
+    Promise.using(disposer, (stub) => {
+      stub.returns(klass);
+      return queue.put({ klass: 'Klass', jid: 'jid' })
+        .then(() => worker.run());
+    });
+
+    while (worker.pool.workers.length < worker.config.processes) {
+      // eslint-disable-next-line no-await-in-loop
+      await Promise.delay(50);
+    }
+    const mocks = worker.pool.workers.map((child) => jest.spyOn(child.worker, 'kill'));
+
+    await Promise.delay(6000);
+    for (const mock of mocks) {
+      expect(mock.mock.calls.length).to.be.equal(1);
+    }
+  }, 15000);
 
   it('can quit workers that consume too much memory', async () => {
     worker.memory.max = 0;
