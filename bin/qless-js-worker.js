@@ -45,7 +45,8 @@ commander
   .option('-v, --verbose', 'Increase logging level', increaseVerbosity, 0)
   .option('-a, --allow-paths', 'Allow paths for job class names')
   .option('-m, --max-memory <max>', 'Maximum memory each process can consume', 'Infinity')
-  .option('-t, --set-tmpdir', 'Set tmpdir to be qless worker process workdir');
+  .option('-t, --set-tmpdir', 'Set tmpdir to be qless worker process workdir')
+  .option('--timeout <ms>', 'Set max job lifetime');
 
 const options = commander.parse(process.argv);
 
@@ -88,6 +89,7 @@ const config = {
     max: getMaxMemory(),
   },
   setTmpdir: options.setTmpdir,
+  timeout: options.timeout !== undefined ? parseInt(options.timeout, 10) : undefined,
 };
 
 const worker = options.processes === 1
